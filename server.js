@@ -5,7 +5,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const app = express();
@@ -32,9 +31,14 @@ const db = mysql.createConnection({
 });
 
 db.connect((err) => {
-  if (err) console.log("DB Connection Error:", err);
-  else console.log("Connected to PlanetScale");
+  if (err) {
+    console.error("Error connecting to the database:", err);
+    return;
+  }
+  console.log("Connected to Aiven MySQL successfully!");
 });
+
+export default db;
 
 app.get("/", (req, res) => {
   res.send("Backend is live!");
