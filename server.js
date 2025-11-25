@@ -37,6 +37,10 @@ db.connect((err) => {
   else console.log("Connected to PlanetScale");
 });
 
+app.get("/", (req, res) => {
+  res.send("Backend is live!");
+});
+
 app.post('/log-in', (req, res) => {
     const sql = 'SELECT * FROM login WHERE email = ?';
     db.query(sql, [req.body.email], (err,data) => {
