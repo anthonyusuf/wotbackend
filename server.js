@@ -1,51 +1,40 @@
 import express from 'express';
-import mysql from 'mysql'
-import cors from 'cors'
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import mysql from 'mysql2';
+import cors from 'cors';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 
-
-const salt = 10;
+dotenv.config();
 
 const app = express();
+const salt = 10;
+
 app.use(cookieParser());
 app.use(express.json());
+
 app.use(cors({
-    origin: ["http://localhost:5173"],
-    methods: ["POST", "GET", "PUT"],
-    credentials: true
+  origin: [
+    "http://localhost:5173",                     // dev
+      
+  ],
+  methods: ["POST", "GET", "PUT"],
+  credentials: true
 }));
 
-const db = mysql.createConnection({ 
-    host:"localhost",
-    user: "root",
-    password: "",
-    database: 'signup'
-    
+// PlanetScale MySQL Connection
+const db = mysql.createConnection({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: { rejectUnauthorized: true }
 });
 
-app.post('/register', (req, res) => {
-  const { firstname, lastname, email, password } = req.body;
-
-  const sql = `
-    INSERT INTO login (firstname, lastname, email, password, role)
-    VALUES (?, ?, ?, ?, 'user')
-  `;
-
-  bcrypt.hash(password.toString(), salt, (err, hash) => {
-    if (err) return res.status(500).json({ Error: "Password hashing error" });
-
-    const values = [firstname, lastname, email, hash];
-
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ Error: "Insert data error" });
-      }
-      return res.status(200).json({ Status: "Success" });
-    });
-  });
+db.connect((err) => {
+  if (err) console.log("DB Connection Error:", err);
+  else console.log("Connected to PlanetScale");
 });
 
 app.post('/log-in', (req, res) => {
